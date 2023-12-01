@@ -19,7 +19,7 @@ f :: String -> String -> String
 f [] _ = []
 f k@(x:xs) a
     | isDigit x = x : f xs ""
-    | not . null $ mp = lookUp (head (mp)) : f k ""
+    | not . null $ mp = (lookUp . head $ mp) : f k ""
     | otherwise = f xs (a++[x])
     where   m ks = filter (`isInfixOf` ks) numNames
             mp = m (a++[x])
