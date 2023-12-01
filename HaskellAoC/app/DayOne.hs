@@ -10,19 +10,21 @@ import Data.List (isInfixOf)
 stringToInt :: String -> Int
 stringToInt = read
 
-numNames :: [String]
 numNames = ["one","two","three","four","five","six","seven","eight","nine"]
 
+lookUpTable = Map.fromList $ zip numNames ['1'..'9']
+
 lookUp :: String -> Char
-lookUp s = fromMaybe ' ' $ Map.lookup s $ Map.fromList $ zip numNames [intToDigit x | x <- [1..]]
+lookUp s = fromMaybe ' ' $ Map.lookup s $ lookUpTable
 
 f :: String -> String -> String
 f [] _ = []
 f k@(x:xs) a
     | isDigit x = x : f xs ""
-    | not . null . m $ (a++[x]) = lookUp (head (m (a++[x]))) : f k ""
+    | not . null $ mp = lookUp (head (mp)) : f k ""
     | otherwise = f xs (a++[x])
     where   m ks = filter (`isInfixOf` ks) numNames
+            mp = m (a++[x])
 
 dayOneP2 :: [String] -> Int
 dayOneP2 = dayOneP1 . map (`f` "") 
