@@ -1,9 +1,7 @@
 module DayOne (dayOneP1, dayOneP2) where
 
 import Data.Char (isDigit, digitToInt, intToDigit)
-import qualified Data.Map as Map
 import Data.Maybe (isNothing, fromJust, fromMaybe)
-import Utils.Containers.Internal.StrictPair (StrictPair)
 import Data.List (isInfixOf)
 
 
@@ -12,10 +10,10 @@ stringToInt = read
 
 numNames = ["one","two","three","four","five","six","seven","eight","nine"]
 
-lookUpTable = Map.fromList $ zip numNames ['1'..'9']
+lookUpList = zip numNames ['1'..'9']
 
 lookUp :: String -> Char
-lookUp s = fromMaybe ' ' $ Map.lookup s $ lookUpTable
+lookUp s = fromMaybe ' ' $ lookup s lookUpList
 
 f :: String -> String -> String
 f [] _ = []
