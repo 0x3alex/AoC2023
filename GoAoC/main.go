@@ -7,5 +7,5 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-	dayOne(file)
+	dayTwoP2(file)
 }

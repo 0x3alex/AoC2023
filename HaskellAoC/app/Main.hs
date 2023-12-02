@@ -1,7 +1,8 @@
 module Main where
 import DayOne
+import DayTwo (dayTwoP1)
 -------------------------------------------
 main :: IO ()
 main = do
     s <- readFile "./app/input.txt"
-    print . dayOneP2 . lines $ s
+    print . dayTwoP1 $ lines s
