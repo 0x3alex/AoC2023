@@ -1,9 +1,21 @@
 module DayTwo where
 import Data.List.Split (splitOn, split)
-import Data.Char (isDigit)
-import Data.List (find, isInfixOf, elemIndex)
+import qualified Data.Map as Map
+import Data.Char (isDigit, isSpace)
+import Data.List (find, isInfixOf, elemIndex, intersperse)
 import Data.Maybe (fromMaybe)
+import Text.Read (Lexeme(String))
+--Part 2--
+dayTwoP2_1 :: String -> Int
+dayTwoP2_1 xs = foldl (\acc (a,b) -> acc * b) 1 $ Map.toList $ Map.fromListWith max r
+        where 
+                repl = splitOn "," $ map(\x -> if x == ';' then ',' else x) xs
+                r = map(\(a,b) -> (b,a)) $ foldl(\acc x -> acc ++ (reads x:: [(Int,String)])) [] repl
+        
+dayTwoP2 :: [String] -> Int
+dayTwoP2 = foldl(\acc x -> acc + dayTwoP2_1 (last $ splitOn ":" x)) 0
 
+-- Part 1--
 dayTwoP1_4 :: [String] -> Bool
 dayTwoP1_4 x = g "green" 13 && g "blue" 14 && g "red" 12
         where
