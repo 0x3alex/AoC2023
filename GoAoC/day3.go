@@ -61,7 +61,7 @@ func checkForNums(row, col int, p2 bool) int {
 			}
 		}
 	}
-	if len(results) != 2 {
+	if len(results) != 2 && p2 {
 		return 0
 	}
 	s := 1
