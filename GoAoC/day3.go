@@ -11,14 +11,6 @@ import (
 
 var field [][]rune
 
-func printField() {
-	for _, v := range field {
-		for _, k := range v {
-			fmt.Printf("%c", k)
-		}
-		println()
-	}
-}
 func takeNum(col, row int) int {
 	tC := col
 	var r string
