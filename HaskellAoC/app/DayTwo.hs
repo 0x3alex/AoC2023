@@ -4,7 +4,6 @@ import qualified Data.Map as Map
 import Data.Char (isDigit, isSpace)
 import Data.List (find, isInfixOf, elemIndex, intersperse)
 import Data.Maybe (fromMaybe)
-import Text.Read (Lexeme(String))
 --Part 2--
 dayTwoP2_1 :: String -> Int
 dayTwoP2_1 xs = foldl (\acc (a,b) -> acc * b) 1 $ Map.toList $ Map.fromListWith max r
