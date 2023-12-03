@@ -64,10 +64,19 @@ func checkForNums(row, col int, p2 bool) int {
 	if len(results) != 2 && p2 {
 		return 0
 	}
-	s := 1
-	for k, _ := range results {
-		s *= k
+	var s int
+	if p2 {
+		s = 1
+		for k, _ := range results {
+			s *= k
+		}
+	} else {
+		s = 0
+		for k, _ := range results {
+			s += k
+		}
 	}
+
 	return s
 
 }
