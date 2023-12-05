@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"math"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -22,10 +23,39 @@ func isEmptyLine(s string) bool {
 	return true
 }
 
-func findTranslation(i int, m []map[string]int) int {
-	if i < m[len(m)-1]["min"] || i > m[len(m)-1]["max"] {
-		return i
+func findMin(m []map[string]int, ig []int) (int, int) {
+	min := 0
+	max := 0
+outerLoop:
+	for i, v := range m {
+		for _, k := range ig {
+			if v["sStart"] == k {
+				continue outerLoop
+			}
+		}
+		if i == 0 {
+			min = v["sStart"]
+		} else {
+			min = int(math.Min(float64(min), float64(v["sStart"])))
+		}
+		max = v["sEnd"]
 	}
+	return min, max
+}
+
+func findMinSrcFromDest(i int, m []map[string]int) int {
+	for _, a := range m {
+		dStart := a["dStart"]
+		dEnd := a["dEnd"]
+		if dStart <= i && i <= dEnd {
+			o := i - dStart
+			return a["sStart"] + o
+		}
+	}
+	return i
+}
+
+func findTranslation(i int, m []map[string]int) int {
 	for _, v := range m {
 		sStart := v["sStart"]
 		sEnd := v["sEnd"]
@@ -70,7 +100,7 @@ outerloop:
 				for i := 0; i < len(sp); i += 2 {
 					s, _ := strconv.Atoi(sp[i])
 					e, _ := strconv.Atoi(sp[i+1])
-					seedsP2 = append(seedsP2, Tuple{s, e})
+					seedsP2 = append(seedsP2, Tuple{s, s + e})
 				}
 				continue
 			}
@@ -88,25 +118,10 @@ outerloop:
 		rangeLength, _ := strconv.Atoi(data[2])
 		m := make(map[string]int)
 		m["dStart"] = destinationRangeStart
+		m["dEnd"] = destinationRangeStart + rangeLength
 		m["sStart"] = sourceRangeStart
 		m["sEnd"] = sourceRangeStart + rangeLength
 		ma[currentMap] = append(ma[currentMap], m)
-	}
-	for k, v := range ma {
-		var mMin, mMax int
-		for i, m := range v {
-			if i == 0 {
-				mMin = m["sStart"]
-				mMax = m["sEnd"]
-				continue
-			}
-			mMin = int(math.Min(float64(m["sStart"]), float64(mMin)))
-			mMax = int(math.Max(float64(m["sEnd"]), float64(mMax)))
-		}
-		ma[k] = append(ma[k], map[string]int{
-			"min": mMin,
-			"max": mMax,
-		})
 	}
 	lowestLocation := 0
 	if !p2 {
@@ -125,7 +140,45 @@ outerloop:
 			lowestLocation = int(math.Min(float64(lowestLocation), float64(g)))
 		}
 	} else {
+		var res []int
+		c := make(chan int)
+		for _, v := range seedsP2 {
+			a := v.a
+			b := v.b
+			go func(s, e int, k chan int) {
+				lowest := 0
+				first := true
+				for i := s; i <= e; i++ {
+					a := findTranslation(i, ma["seed-to-soil"])
+					b := findTranslation(a, ma["soil-to-fertilizer"])
+					c := findTranslation(b, ma["fertilizer-to-water"])
+					d := findTranslation(c, ma["water-to-light"])
+					e := findTranslation(d, ma["light-to-temperature"])
+					f := findTranslation(e, ma["temperature-to-humidity"])
+					g := findTranslation(f, ma["humidity-to-location"])
+					if first {
+						lowest = g
+						first = false
+						continue
+					}
+					lowest = int(math.Min(float64(lowest), float64(g)))
 
+				}
+				res = append(res, lowest)
+				k <- 1
+			}(a, b, c)
+		}
+		sum := 0
+		for {
+			_ = <-c
+			sum++
+			println("routine is done, ", sum, "/", len(seedsP2))
+			if sum == len(seedsP2) {
+				break
+			}
+		}
+		sort.Ints(res)
+		lowestLocation = res[0]
 	}
 
 	println("Lowest location is ", lowestLocation)
