@@ -7,6 +7,6 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-	dayFive(file, true)
+	daySix(file)
 	file.Close()
 }
