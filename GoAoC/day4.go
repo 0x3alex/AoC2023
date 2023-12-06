@@ -1,21 +1,12 @@
 package main
 
 import (
+	"GoAoC/utils"
 	"bufio"
 	"os"
 	"strconv"
 	"strings"
 )
-
-func isAllSpace(s string) bool {
-	for _, v := range s {
-		if v != ' ' {
-			return false
-		}
-
-	}
-	return true
-}
 
 func extractNums(raw string) (nums []string, winning map[string]interface{}) {
 	a := strings.TrimSpace(strings.Split(raw, ":")[1])
@@ -26,7 +17,7 @@ func extractNums(raw string) (nums []string, winning map[string]interface{}) {
 	scratchedNums := strings.TrimSpace(b[1])
 	scratchedNumsList := strings.Split(scratchedNums, " ")
 	for _, v := range winningNumsList {
-		if _, ok := winningNumsMap[v]; !ok && !isAllSpace(v) {
+		if _, ok := winningNumsMap[v]; !ok && !utils.IsAllSpace(v) {
 			v = strings.TrimSpace(v)
 			winningNumsMap[v] = nil
 

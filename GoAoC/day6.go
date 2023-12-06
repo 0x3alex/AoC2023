@@ -1,20 +1,12 @@
 package main
 
 import (
+	"GoAoC/utils"
 	"bufio"
 	"os"
 	"strconv"
 	"strings"
 )
-
-func filter(s []string) (r []string) {
-	for _, v := range s {
-		if !isAllSpace(v) {
-			r = append(r, v)
-		}
-	}
-	return r
-}
 
 func daySixP2(file *os.File) {
 	s := bufio.NewScanner(file)
@@ -43,7 +35,7 @@ func daySix(file *os.File) {
 	for s.Scan() {
 		raw := s.Text()
 		data := strings.Split(raw, " ")[1:]
-		filtered := filter(data)
+		filtered := utils.Filter(data, utils.NotIsAllSpace)
 		for _, v := range filtered {
 			a, _ := strconv.Atoi(v)
 			d = append(d, a)
