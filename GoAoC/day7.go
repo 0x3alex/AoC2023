@@ -9,22 +9,52 @@ import (
 )
 
 type card struct {
-	price  int
-	m      map[rune]int
-	text   string
-	rating int
+	price   int
+	m       map[rune]int
+	text    string
+	rating  int
+	oldText string
 }
 
-func MapOut(s string) map[rune]int {
-	result := make(map[rune]int)
+func fixJoker(s string) (string, rune) {
+	count := 0
+	var maxV rune
 	for _, v := range s {
+		if c := strings.Count(s, string(v)); c > count && v != 'J' {
+			count = c
+			maxV = v
+		}
+	}
+	return strings.ReplaceAll(s, "J", string(maxV)), maxV
+}
+
+func MapOut(s string) (map[rune]int, string, string) {
+	result := make(map[rune]int)
+	if s == "JJJJJ" {
+		s = "AAAAA"
+	}
+	hasJoker := false
+	for _, v := range s {
+		if v == 'J' {
+			hasJoker = true
+		}
 		if _, ok := result[v]; !ok {
 			result[v] = 1
 		} else {
 			result[v] += 1
 		}
 	}
-	return result
+	k := s
+	var r rune
+	if hasJoker {
+		k, r = fixJoker(s)
+		if k != s {
+			result[r] += result['J']
+			delete(result, 'J')
+		}
+
+	}
+	return result, s, k
 }
 
 func determineHandValue(c *card) {
@@ -66,10 +96,12 @@ func daySeven(file *os.File) {
 		hand := sp[0]
 		price := sp[1]
 		a, _ := strconv.Atoi(price)
+		b, c, d := MapOut(hand)
 		cards = append(cards, card{
-			price: a,
-			m:     MapOut(hand),
-			text:  hand,
+			price:   a,
+			m:       b,
+			text:    d,
+			oldText: c,
 		})
 	}
 	for i, _ := range cards {
@@ -81,6 +113,12 @@ func daySeven(file *os.File) {
 				if cards[i].text[l] != cards[j].text[l] {
 					return cards[i].text[l] > cards[j].text[l]
 				}
+			}
+			if cards[i].text == cards[j].text {
+				if strings.Contains(cards[i].oldText, "J") {
+					return false
+				}
+				return true
 			}
 		}
 		return cards[i].rating < cards[j].rating
