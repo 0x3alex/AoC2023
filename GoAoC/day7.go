@@ -30,8 +30,11 @@ func fixJoker(s string) (string, rune) {
 
 func MapOut(s string) (map[rune]int, string, string) {
 	result := make(map[rune]int)
+	k := s
 	if s == "JJJJJ" {
-		s = "AAAAA"
+		return map[rune]int{
+			'A': 5,
+		}, s, "AAAAA"
 	}
 	hasJoker := false
 	for _, v := range s {
@@ -44,7 +47,7 @@ func MapOut(s string) (map[rune]int, string, string) {
 			result[v] += 1
 		}
 	}
-	k := s
+
 	var r rune
 	if hasJoker {
 		k, r = fixJoker(s)
