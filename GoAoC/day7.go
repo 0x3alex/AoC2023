@@ -1,6 +1,7 @@
 package main
 
 import (
+	"GoAoC/utils"
 	"bufio"
 	"os"
 	"sort"
@@ -8,127 +9,166 @@ import (
 	"strings"
 )
 
+var values = map[string]int{
+	"A": 14,
+	"K": 13,
+	"Q": 12,
+	"J": 11,
+	"T": 10,
+	"9": 9,
+	"8": 8,
+	"7": 7,
+	"6": 6,
+	"5": 5,
+	"4": 4,
+	"3": 3,
+	"2": 2,
+	"1": 1,
+	"0": 0,
+}
+
 type card struct {
-	price   int
-	m       map[rune]int
-	text    string
-	rating  int
-	oldText string
+	fields map[int]int
+	intTxt []int
+
+	filed2   map[int]int
+	intText2 []int
+	price    int
+	rating   int
+	text     string
+	text2    string
 }
 
-func fixJoker(s string) (string, rune) {
-	count := 0
-	var maxV rune
-	for _, v := range s {
-		if c := strings.Count(s, string(v)); c > count && v != 'J' {
-			count = c
-			maxV = v
+func getRating(m map[int]int) int {
+	var tmpRaitings []int
+	for k, v := range m {
+		println(k, ":", v)
+		if v == 5 {
+			return 7
 		}
-	}
-	return strings.ReplaceAll(s, "J", string(maxV)), maxV
-}
-
-func MapOut(s string) (map[rune]int, string, string) {
-	result := make(map[rune]int)
-	k := s
-	if s == "JJJJJ" {
-		return map[rune]int{
-			'A': 5,
-		}, s, "AAAAA"
-	}
-	hasJoker := false
-	for _, v := range s {
-		if v == 'J' {
-			hasJoker = true
+		if v == 4 {
+			return 6
 		}
-		if _, ok := result[v]; !ok {
-			result[v] = 1
-		} else {
-			result[v] += 1
-		}
-	}
-
-	var r rune
-	if hasJoker {
-		k, r = fixJoker(s)
-		if k != s {
-			result[r] += result['J']
-			delete(result, 'J')
-		}
-
-	}
-	return result, s, k
-}
-
-func determineHandValue(c *card) {
-	twoPair := false
-	for _, v := range c.m {
-		if v == 5 { //five of a kind
-			c.rating = 7
-		}
-		if v == 4 { //four of a kind
-			c.rating = 6
-		}
-		if v == 3 { //three of a kind
-			c.rating = 4
+		if v == 3 {
+			tmpRaitings = append(tmpRaitings, 5)
 		}
 		if v == 2 {
-			if twoPair {
-				c.rating = 3
+			if len(tmpRaitings) == 1 && tmpRaitings[0] == 2 {
+				return 3
 			} else {
-				twoPair = true
+				tmpRaitings = append(tmpRaitings, 2)
+
 			}
 		}
 	}
-	if twoPair && c.rating == 0 { //one pair
-		c.rating = 2
+	for _, v := range tmpRaitings {
+		println(v)
 	}
-	if c.rating == 5 && twoPair {
-		c.rating = 5
-	}
-	if !twoPair && c.rating == 0 {
-		c.rating = 1
+	if utils.Any(tmpRaitings, func(i int) bool { return i == 5 }) && utils.Any(tmpRaitings, func(i int) bool { return i == 2 }) {
+		return 5
+	} else if len(tmpRaitings) == 1 && tmpRaitings[0] == 2 {
+		return 2
+	} else if utils.Any(tmpRaitings, func(i int) bool { return i == 5 }) && !utils.Any(tmpRaitings, func(i int) bool { return i == 2 }) {
+		return 4
+	} else {
+		return 1
 	}
 }
-func daySeven(file *os.File) {
-	scan := bufio.NewScanner(file)
+
+func fixJokers(s string) string {
+	if s == "JJJJJ" {
+		return "AAAAA"
+	}
+	count := 0
+	var ru rune
+	for _, v := range s {
+		if c := strings.Count(s, string(v)); c > count && v != 'J' {
+			ru = v
+			count = c
+		}
+	}
+	return strings.ReplaceAll(s, "J", string(ru))
+}
+
+func buildCard(sp []string) card {
+	hand := sp[0]
+	rating, _ := strconv.Atoi(sp[1])
+	r := make(map[int]int)
+	var intTxt []int
+	for _, p := range strings.Split(hand, "") {
+
+		v, _ := values[p]
+		if _, ok := r[v]; ok {
+			r[v] += 1
+		} else {
+			r[v] = 1
+		}
+		intTxt = append(intTxt, v)
+	}
+	return card{
+		text:   hand,
+		fields: r,
+		intTxt: intTxt,
+		price:  rating,
+		rating: getRating(r),
+	}
+}
+
+func daySeven(file *os.File, p2 bool) {
+	scanner := bufio.NewScanner(file)
 	var cards []card
-	for scan.Scan() {
-		raw := scan.Text()
+	for scanner.Scan() {
+		raw := scanner.Text()
 		sp := strings.Split(raw, " ")
-		hand := sp[0]
-		price := sp[1]
-		a, _ := strconv.Atoi(price)
-		b, c, d := MapOut(hand)
-		cards = append(cards, card{
-			price:   a,
-			m:       b,
-			text:    d,
-			oldText: c,
-		})
-	}
-	for i, _ := range cards {
-		determineHandValue(&cards[i])
-	}
-	sort.Slice(cards, func(i, j int) bool {
-		if cards[i].rating == cards[j].rating {
-			for l := 0; l < len(cards[i].text); l++ {
-				if cards[i].text[l] != cards[j].text[l] {
-					return cards[i].text[l] > cards[j].text[l]
-				}
+		if p2 {
+			//println(sp[0])
+			//println(fixJokers(sp[0]))
+			//sp[0] = fixJokers(sp[0])
+			var tmp []string
+			tmp = append(tmp, strings.ReplaceAll(sp[0], "J", "1"))
+			tmp = append(tmp, sp[1])
+			c := buildCard(tmp)
+			println(sp[0])
+			sp[0] = fixJokers(sp[0])
+			println(sp[0])
+			c1 := buildCard(sp)
+			cr := card{
+				fields:   c1.fields,
+				intTxt:   c1.intTxt,
+				filed2:   c.fields,
+				intText2: c.intTxt,
+				text:     c1.text,
+				text2:    c.text,
+				rating:   c1.rating,
+				price:    c.price,
 			}
-			if cards[i].text == cards[j].text {
-				if strings.Contains(cards[i].oldText, "J") {
-					return false
+			cards = append(cards, cr)
+		} else {
+			cards = append(cards, buildCard(sp))
+		}
+
+	}
+	sort.SliceStable(cards, func(i, j int) bool {
+		if cards[i].rating == cards[j].rating {
+			if p2 {
+				for k, v := range cards[i].intText2 {
+					if v != cards[j].intText2[k] {
+						return v < cards[j].intText2[k]
+					}
 				}
-				return true
+			} else {
+				for k, v := range cards[i].intTxt {
+					if v != cards[j].intTxt[k] {
+						return v < cards[j].intTxt[k]
+					}
+				}
 			}
 		}
 		return cards[i].rating < cards[j].rating
 	})
 	sum := 0
 	for i, v := range cards {
-		println("card ", v.text, " with price ", v.price, " has rating ", i+1)
+		println(i, " Card ", v.text, "("+v.text2+")", " has rating ", v.rating, " and price ", v.price)
 		sum += v.price * (i + 1)
 	}
 	println(sum)
