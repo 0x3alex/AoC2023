@@ -3,7 +3,6 @@ package main
 import (
 	"GoAoC/utils"
 	"bufio"
-	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -15,8 +14,7 @@ func solveDayNine2(i []int) int {
 		if k+1 >= len(i) {
 			continue
 		}
-		n := i[k+1] - i[k]
-		tmp = append(tmp, n)
+		tmp = append(tmp, i[k+1]-i[k])
 	}
 
 	if utils.All(i, func(i int) bool { return i == 0 }) {
@@ -25,8 +23,7 @@ func solveDayNine2(i []int) int {
 	if len(tmp) == 1 {
 		return tmp[0]
 	}
-	n := solveDayNine2(tmp)
-	return tmp[0] - n
+	return tmp[0] - solveDayNine2(tmp)
 }
 
 func solveDayNine1(i []int) int {
@@ -35,8 +32,7 @@ func solveDayNine1(i []int) int {
 		if k+1 >= len(i) {
 			continue
 		}
-		n := i[k+1] - i[k]
-		tmp = append(tmp, n)
+		tmp = append(tmp, i[k+1]-i[k])
 	}
 
 	if utils.All(i, func(i int) bool { return i == 0 }) {
@@ -56,28 +52,18 @@ func dayNine(file *os.File, p2 bool) {
 		raw := scanner.Text()
 		sp := strings.Split(raw, " ")
 		for _, v := range sp {
-			if v == " " {
-				continue
+			if v != " " {
+				a, _ := strconv.Atoi(v)
+				i = append(i, a)
 			}
-			a, _ := strconv.Atoi(v)
-			i = append(i, a)
 		}
-		for _, v := range i {
-			fmt.Printf("%d ", v)
-		}
-		println()
 		if !p2 {
 			n := solveDayNine1(i)
-			println("adding ", n)
 			sum += i[len(i)-1] + n
 		} else {
 			n := solveDayNine2(i)
-			println("adding ", n)
 			sum += i[0] - n
 		}
-
-		//2107948156
-		//2098490942
 	}
 	println(sum)
 }
