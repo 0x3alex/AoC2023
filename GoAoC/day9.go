@@ -4,27 +4,10 @@ import (
 	"GoAoC/utils"
 	"bufio"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 )
-
-func solveDayNine2(i []int) int {
-	var tmp []int
-	for k := 0; k < len(i); k++ {
-		if k+1 >= len(i) {
-			continue
-		}
-		tmp = append(tmp, i[k+1]-i[k])
-	}
-
-	if utils.All(i, func(i int) bool { return i == 0 }) {
-		return 0
-	}
-	if len(tmp) == 1 {
-		return tmp[0]
-	}
-	return tmp[0] - solveDayNine2(tmp)
-}
 
 func solveDayNine1(i []int) int {
 	var tmp []int
@@ -34,7 +17,6 @@ func solveDayNine1(i []int) int {
 		}
 		tmp = append(tmp, i[k+1]-i[k])
 	}
-
 	if utils.All(i, func(i int) bool { return i == 0 }) {
 		return 0
 	}
@@ -50,19 +32,16 @@ func dayNine(file *os.File, p2 bool) {
 	for scanner.Scan() {
 		var i []int
 		raw := scanner.Text()
-		sp := strings.Split(raw, " ")
+		sp := strings.Fields(raw)
 		for _, v := range sp {
-			if v != " " {
-				a, _ := strconv.Atoi(v)
-				i = append(i, a)
-			}
+			a, _ := strconv.Atoi(v)
+			i = append(i, a)
 		}
 		if !p2 {
-			n := solveDayNine1(i)
-			sum += i[len(i)-1] + n
+			sum += i[len(i)-1] + solveDayNine1(i)
 		} else {
-			n := solveDayNine2(i)
-			sum += i[0] - n
+			slices.Reverse(i)
+			sum += i[len(i)-1] + solveDayNine1(i)
 		}
 	}
 	println(sum)
